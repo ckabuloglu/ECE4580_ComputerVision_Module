@@ -34,12 +34,21 @@ feature_matrix = [];
 % transform each RGB image to gray image, and extract sift feature by vlfeat
 % collect all features in 'feature_matrix'(128 by number of all features)
 
+addpath('./cars'); files_car = dir(['./cars' '/*.jpg']);
 
-    
+for n = 1:40
+    im = single(vl_imreadgray(files_car(n).name));
+    [f,d] = vl_sift(im);
+    feature_matrix = [feature_matrix d];
+end
 
+addpath('./faces'); files_faces = dir(['./faces' '/*.jpg']);
 
-
-
+for n = 1:40
+    im = single(vl_imreadgray(files_faces(n).name));
+    [f,d] = vl_sift(im);
+    feature_matrix = [feature_matrix d];
+end
 
 % find the centers of features by k-means
 feature_matrix = single(feature_matrix);
@@ -50,13 +59,7 @@ feature_matrix = single(feature_matrix);
 % compute a kd-tree using vlfeat libariry using C above, and output to
 % FOREST variable (should be just one line of code)
 
-FOREST = [];
-
-
-
-
-
-
+FOREST = vl_kdtreebuild(C);
 
 
 %% building bag-of-words for CARs and FACEs
@@ -77,14 +80,24 @@ BOW_matrix_faces = [];
 %
 % hint: BOW_matrix_cars and BOW_matrix_faces are both k by number of images
 
+addpath('./cars'); files_car = dir(['./cars' '/*.jpg']);
 
+for n = 1:40
+    im = single(vl_imreadgray(files_car(n).name));
+    [~,d] = vl_sift(im);
+    [ind, ~] = vl_kdtreequery(FOREST, C, single(d));
+    [N, ~] = histcounts(ind, 'Normalization', 'probability');
+    BOW_matrix_cars = [BOW_matrix_cars, N'];
+end
 
+addpath('./faces'); files_faces = dir(['./faces' '/*.jpg']);
 
-
-
-
-
-
-
+for n = 1:40
+    im = single(vl_imreadgray(files_faces(n).name));
+    [~,d] = vl_sift(im);
+    [ind, ~] = vl_kdtreequery(FOREST, C, single(d));
+    [N, ~] = histcounts(ind, 'Normalization', 'probability');
+    BOW_matrix_faces = [BOW_matrix_faces, N'];
+end
 
 toc

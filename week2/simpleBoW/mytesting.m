@@ -23,8 +23,8 @@ correct_face = 0;
 
 addpath('./cars'); files = dir(['./cars' '/*.jpg']);
 for i=41:90
-    disp(files(i).name); 
-    I = imread(files(i).name);
+%     disp(files(i).name); 
+%     I = imread(files(i).name);
     % TODOs:
     % for each of testing image, 
     % (1) extract sift descriptor as in training process
@@ -32,40 +32,41 @@ for i=41:90
     % (3) store normalized histogram as variable v for knnsearch
     % (4) assign it to the closer object
     
-    
-    
-    
-    
-    
-    
-    
-    
+    im = single(vl_imreadgray(files(i).name));
+    [f,d] = vl_sift(im);
+    [ind, ~] = vl_kdtreequery(FOREST, C, single(d));
+    [v, edges] = histcounts(ind, 'Normalization', 'probability');
+    v = v';
+     
     [IDX d_car] = knnsearch(BOW_matrix_cars',v');
     [IDX d_face] = knnsearch(BOW_matrix_faces',v');
+    d_car
+    d_face
     if(d_car < d_face)
-        correct_car = correct_car+1;
+        correct_car = correct_car + 1;
     end
 end
 clear files
 
 addpath('./faces'); files = dir(['./faces' '/*.jpg']);
 for i=41:90
-    disp(files(i).name); 
+%     disp(files(i).name); 
     I = imread(files(i).name);
     % TODOs:
     % same as above except this is for face
     
+    im = single(vl_imreadgray(files(i).name));
+    [f,d] = vl_sift(im);
+    [ind, ~] = vl_kdtreequery(FOREST, C, single(d));
+    [v, edges] = histcounts(ind, 'Normalization', 'probability');
+    v = v';
     
-    
-    
-    
-    
-    
-    
-    
-    
+    [IDX d_car] = knnsearch(BOW_matrix_cars',v');
+    [IDX d_face] = knnsearch(BOW_matrix_faces',v');
+    d_car
+    d_face
     if(d_face < d_car)
-        correct_face = correct_face+1;
+        correct_face = correct_face + 1;
     end
 end
 clear files
